@@ -2,6 +2,7 @@ import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 /**
  * Video Class
  * Stores all data necessary to play video with audio and hyperlinks
+ * Assumes that the folder specified in folderPath only contains a single video with multiple
+ * .rgb files with sequential naming convention, a single .wav file, and an optional .hyp file
  */
 
 public class Video {
@@ -24,7 +27,7 @@ public class Video {
     private Frame[] frameArray;
     private VideoLink[][] linkArray;
     private Boolean isHyper;
-    //private AudioSegment[] audioArray; //TBD
+    private FileInputStream audioStream;
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
@@ -67,7 +70,9 @@ public class Video {
             br.close();
         }
         
-        //Deal with audio - TBD
+        //Create audioStream from wav file
+        File[] wavFile = dir.listFiles((d, name) -> name.endsWith(".wav"));
+        this.audioStream = new FileInputStream(wavFile[0]);
     }
     
     public int getCurrentFrameNum() {
@@ -87,8 +92,13 @@ public class Video {
         return linkArray[currentFrame];
     }
     
-    public void getCurrentAudio() {
-        //TBD
+    public FileInputStream getAudioStream() {
+        return audioStream;
+    }
+    //returns the index offset into the audioStream to be used for frame sync
+    //assumes 16 bits per sample at 44.1kHz
+    public long getCurrentAudioOffset() {
+        return currentFrame * 2 * 1470;
     }
     
     public boolean isHyper() {
