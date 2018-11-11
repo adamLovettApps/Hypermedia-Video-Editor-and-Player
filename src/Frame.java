@@ -22,8 +22,7 @@ public class Frame {
     
     private byte[] data;
     
-    Frame(String fileName) throws IOException {
-        File file = new File(fileName);
+    Frame(File file) throws IOException {
         this.data = new byte[(int)file.length()];
         DataInputStream dataStream = new DataInputStream(new FileInputStream(file));
         dataStream.readFully(data);
