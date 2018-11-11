@@ -78,8 +78,9 @@ public class Video {
         return frameArray[currentFrame];
     }
     
-    public void setCurrentFrame(int index) {
+    public void setCurrentFrame(int index) throws IOException {
         this.currentFrame = index;
+        bufferFrames();
     }
     
     public VideoLink[] getCurrentVideoLinks() {
@@ -96,7 +97,9 @@ public class Video {
     
     private void bufferFrames() throws IOException {
         for (int i = currentFrame; i < FRAME_BUFFER; i++) {
-            frameArray[i] = new Frame(rgbFiles[i]);
+            if (frameArray[i] == null) {
+                frameArray[i] = new Frame(rgbFiles[i]);
+            }
         }
     }   
 }
