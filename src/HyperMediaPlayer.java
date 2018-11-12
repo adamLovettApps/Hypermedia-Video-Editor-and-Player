@@ -74,6 +74,7 @@ public class HyperMediaPlayer {
 		videoFrame = new JLabel(new ImageIcon(img));
 		ActionListener videoListener = new ActionListener(){
 		    public void actionPerformed(ActionEvent e){
+		    	//System.out.println(System.currentTimeMillis());
 		    	img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
 	  			videoFrame.setIcon(new ImageIcon(img));
 	  			videoFrame.repaint();  	
@@ -81,7 +82,8 @@ public class HyperMediaPlayer {
 	  				videoStack.getFirst().setCurrentFrame(frameCounter);
 	  			}catch(Exception ex) {}
 	  			frameCounter++;
-	  			System.out.println(videoStack.getFirst().getCurrentFrameNum());
+	  			//System.out.println(videoStack.getFirst().getCurrentFrameNum());
+	  			//System.out.println(System.currentTimeMillis());
 	  			
 	  			
 		    }
@@ -99,10 +101,9 @@ public class HyperMediaPlayer {
 			public void mouseClicked(MouseEvent e) {
 				int x=e.getX();
 			    int y=e.getY();
-			    System.out.println(x+","+y);
+			    //System.out.println(x+","+y);
 			    videoTimer.stop();
 			    try {
-			    	System.out.println("BLAH");
 			    	Video nextVideo = new Video("USCTwo");
 		
 			    	videoStack.push(nextVideo);
