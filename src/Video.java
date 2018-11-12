@@ -20,7 +20,8 @@ import java.util.Arrays;
  */
 
 public class Video {
-    public static final int FRAME_BUFFER = 30;
+    public static final int LEADING_FRAME_BUFFER = 30;
+    public static final int TRAILING_FRAME_BUFFER = 30;
     public static final int LINK_MAX = 50;
     private int currentFrame;
     private File[] rgbFiles;
@@ -37,7 +38,7 @@ public class Video {
         this.rgbFiles = dir.listFiles((d, name) -> name.endsWith(".rgb"));
         Arrays.sort(rgbFiles);
         
-        //setup frameArray and instantiate FRAME_BUFFER Frames
+        //setup frameArray and instantiate LEADING_FRAME_BUFFER Frames
         frameArray = new Frame[rgbFiles.length];
         bufferFrames();
         
@@ -106,10 +107,13 @@ public class Video {
     }
     
     private void bufferFrames() throws IOException {
-        for (int i = currentFrame; i < FRAME_BUFFER; i++) {
+        for (int i = currentFrame; i < (currentFrame + LEADING_FRAME_BUFFER); i++) {
             if (frameArray[i] == null) {
                 frameArray[i] = new Frame(rgbFiles[i]);
             }
+        }
+        if (currentFrame >= TRAILING_FRAME_BUFFER) {
+            frameArray[currentFrame - TRAILING_FRAME_BUFFER] = null;
         }
     }   
 }
