@@ -20,7 +20,8 @@ import java.util.Arrays;
  */
 
 public class Video {
-    public static final int FRAME_BUFFER = 30;
+    public static final int LEADING_FRAME_BUFFER = 30;
+    public static final int TRAILING_FRAME_BUFFER = 30;
     public static final int LINK_MAX = 50;
     private int currentFrame;
     private File[] rgbFiles;
@@ -37,7 +38,7 @@ public class Video {
         this.rgbFiles = dir.listFiles((d, name) -> name.endsWith(".rgb"));
         Arrays.sort(rgbFiles);
         
-        //setup frameArray and instantiate FRAME_BUFFER Frames
+        //setup frameArray and instantiate LEADING_FRAME_BUFFER Frames
         frameArray = new Frame[rgbFiles.length];
         bufferFrames();
         
@@ -57,14 +58,28 @@ public class Video {
                 String[] vals = line.split(" ");
                 Rectangle startRect = new Rectangle(Integer.parseInt(vals[2]), Integer.parseInt(vals[3]), Integer.parseInt(vals[4]), Integer.parseInt(vals[5]));
                 Rectangle endRect = new Rectangle(Integer.parseInt(vals[6]), Integer.parseInt(vals[7]), Integer.parseInt(vals[8]), Integer.parseInt(vals[9]));
+                
+                //compute rectangle deltas
+                int startFrame = Integer.parseInt(vals[0]);
+                int endFrame = Integer.parseInt(vals[1]);
+                int dur = endFrame - startFrame;
+                double dx = (endRect.getX() -  startRect.getX()) / dur;
+                double dy = (endRect.getY() -  startRect.getY()) / dur;
+                double dw = (endRect.getWidth() -  startRect.getWidth()) / dur;
+                double dh = (endRect.getHeight() -  startRect.getHeight()) / dur;
+
                 Video video = new Video(vals[10]); //recursive - be careful with test files
-                VideoLink link = new VideoLink(video, Integer.parseInt(vals[11]), startRect); //this is dumb for now. Need to implement rectangle transformation
-                for (int i = Integer.parseInt(vals[0]); i < Integer.parseInt(vals[1]); i++) {
+                for (int i = startFrame; i <= endFrame; i++) {
                     int j = 0;
                     while(linkArray[i][j] != null) {
                         j++;
                     }
-                    linkArray[i][j] = link;
+                    int newX = (int) Math.round(startRect.getX() + dx * (i - startFrame));
+                    int newY = (int) Math.round(startRect.getY() + dy * (i - startFrame));
+                    int newW = (int) Math.round(startRect.getWidth() + dw * (i - startFrame));
+                    int newH = (int) Math.round(startRect.getHeight() + dh * (i - startFrame));
+                    Rectangle rect = new Rectangle(newX, newY, newW, newH);
+                    linkArray[i][j] = new VideoLink(video, Integer.parseInt(vals[11]), rect);
                 }   
             }
             br.close();
@@ -105,11 +120,18 @@ public class Video {
         return isHyper;
     }
     
+    public int getDuration() {
+        return rgbFiles.length;
+    }
+    
     private void bufferFrames() throws IOException {
-        for (int i = currentFrame; i < FRAME_BUFFER; i++) {
+        for (int i = currentFrame; i < (currentFrame + LEADING_FRAME_BUFFER); i++) {
             if (frameArray[i] == null) {
                 frameArray[i] = new Frame(rgbFiles[i]);
             }
+        }
+        if (currentFrame >= TRAILING_FRAME_BUFFER) {
+            frameArray[currentFrame - TRAILING_FRAME_BUFFER] = null;
         }
     }   
 }
