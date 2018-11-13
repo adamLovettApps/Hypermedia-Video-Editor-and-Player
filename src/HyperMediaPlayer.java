@@ -19,6 +19,9 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.AudioSystem;
+import java.lang.Math;
 
 public class HyperMediaPlayer {
 	
@@ -31,7 +34,9 @@ public class HyperMediaPlayer {
 	public Deque<Video> videoStack = new ArrayDeque<Video>();
 	Video currentVideo;
 	static int frameCounter = 1;
-	static int timerDelay = 33;
+	static int timerDelay = 0;
+	static long prevTime = 0;
+	Clip clip;
 	
 	public static void main(String[] args) {
 		String videoFolder = args[0];
@@ -54,6 +59,9 @@ public class HyperMediaPlayer {
 
 	
 	public HyperMediaPlayer() {
+		
+		
+
 	}
 
 
@@ -63,6 +71,14 @@ public class HyperMediaPlayer {
 			videoStack.push(startVideo);
 		}catch(Exception e) {}
 		
+		
+		
+		try {
+			clip = AudioSystem.getClip();
+			clip.open(AudioSystem.getAudioInputStream(new File(videoFolder + "/" + videoFolder + ".wav")));
+			//System.out.println(clip.getMicrosecondLength());
+			}
+			catch(Exception ex) {}
 		
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.DARK_GRAY);
@@ -74,28 +90,24 @@ public class HyperMediaPlayer {
 		videoFrame = new JLabel(new ImageIcon(img));
 		ActionListener videoListener = new ActionListener(){
 		    public void actionPerformed(ActionEvent e){
-		    	//System.out.println(System.currentTimeMillis());
-		    	img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
-	  			videoFrame.setIcon(new ImageIcon(img));
-	  			videoFrame.repaint();  	
-	  			try {
-	  				videoStack.getFirst().setCurrentFrame(frameCounter);
-	  			}catch(Exception ex) {}
-	  			frameCounter++;
-	  			//System.out.println(videoStack.getFirst().getCurrentFrameNum());
-	  			//System.out.println(System.currentTimeMillis());
-	  			
-	  			
+		    	if (videoStack.getFirst().getCurrentFrameNum() < videoStack.getFirst().getDuration()) {
+		    		if ((videoStack.getFirst().getCurrentFrameNum() <= Math.floor(clip.getMicrosecondPosition()/((double)clip.getMicrosecondLength()/(double)videoStack.getFirst().getDuration())))) {
+		    			//System.out.println(clip.getMicrosecondPosition());
+		    			//System.out.println(frameCounter);
+		    			img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+		    			videoFrame.setIcon(new ImageIcon(img));
+		    			videoFrame.repaint();  	
+		    			try {
+		    				videoStack.getFirst().setCurrentFrame(frameCounter);
+		    			}catch(Exception ex) {}
+		    			frameCounter++;
+		    		}
+		    	}
 		    }
 		};
 		
 		Timer videoTimer = new Timer(timerDelay, videoListener);
-		
-		
-		
-		
-		
-		
+			
 		videoFrame.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -117,18 +129,11 @@ public class HyperMediaPlayer {
 		videoFrame.setBounds(20, 20, 352, 288);
 		frame.getContentPane().add(videoFrame);
 		
-		
-		
-		
-		
-		
-		
-		
-		
 		JButton playButton = new JButton("Play");
 		playButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				clip.start();
 				videoTimer.start();
 			}
 		});
@@ -139,6 +144,7 @@ public class HyperMediaPlayer {
 		pauseButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				clip.stop();
 				videoTimer.stop();
 			}
 		});
@@ -150,8 +156,13 @@ public class HyperMediaPlayer {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
+					clip.stop();
 					videoTimer.stop();
+					clip.setMicrosecondPosition(0);
 					videoStack.getFirst().setCurrentFrame(0);
+					img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+	  				videoFrame.setIcon(new ImageIcon(img));
+					videoFrame.repaint();
 					frameCounter = 0;
 				}catch(Exception ex) {}
 			}
@@ -166,38 +177,7 @@ public class HyperMediaPlayer {
 			videoStack.push(video);
 		}catch (Exception e) {}
 	}
-	
-	
-	public BufferedImage getRGBImage(String fileName) {
-		BufferedImage returnImage = new BufferedImage (352,288,BufferedImage.TYPE_INT_RGB);
-		try {
-			imgFile = new File(fileName);
-			byte[] imgBytes = new byte[(int) imgFile.length()];
-			imgStream = new FileInputStream(imgFile);
-			imgStream.read(imgBytes);
-	        imgStream.close();
-	        int byteCount = 0;
-			for(int y = 0; y < 288; y++){
-
-				for(int x = 0; x < 352; x++){
-					byte r = imgBytes[byteCount];
-					byte g = imgBytes[byteCount+101376];
-					byte b = imgBytes[byteCount+101376*2];
-					int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
-					returnImage.setRGB(x,y,pix);			
-					byteCount++;
-				}
-			}
-		}catch (IOException e) {}
 		
-		return returnImage;
-	}
-	
-	
-	
-	
-	
-	
 	
 }
 
