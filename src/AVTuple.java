@@ -3,8 +3,8 @@ import javax.sound.sampled.AudioSystem;
 import java.io.File;
 
 public class AVTuple{ 
-    public Video video; 
-    public Clip clip; 
+    private Video video; 
+    private Clip clip; 
     public AVTuple(Video video, String filePath) { 
         this.video = video; 
         try {
@@ -20,5 +20,4 @@ public class AVTuple{
     public Clip getClip() {
     	return this.clip;
     }
-  
 }

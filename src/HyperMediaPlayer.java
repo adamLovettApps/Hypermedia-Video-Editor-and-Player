@@ -7,9 +7,6 @@ import javax.swing.JButton;
 import java.awt.image.*;
 import java.io.InputStream;
 import javax.swing.Timer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -25,16 +22,15 @@ import java.lang.Math;
 
 public class HyperMediaPlayer {
 	
-	BufferedImage img = new BufferedImage(352, 288, BufferedImage.TYPE_INT_RGB);
+	private BufferedImage img = new BufferedImage(352, 288, BufferedImage.TYPE_INT_RGB);
 	private JFrame frame;
-	JLabel videoFrame;
-	File imgFile = null;
-	InputStream imgStream;
-	public Video startVideo;	
-	static int frameCounter = 0;
-	static int timerDelay = 0;
-	public Deque<AVTuple> avStack = new ArrayDeque<AVTuple>();
-	AVTuple avTuple;
+	private JLabel videoFrame;
+	private File imgFile = null;
+	private InputStream imgStream;
+	private Video startVideo;	
+	private static int frameCounter = 0;
+	private static int timerDelay = 0;
+	private Deque<AVTuple> avStack = new ArrayDeque<AVTuple>();
 	
 	public static void main(String[] args) {
 		String videoFolder = args[0];
@@ -54,16 +50,13 @@ public class HyperMediaPlayer {
 		});
 		
 	}
-
 	
 	public HyperMediaPlayer() {
 	}
 
-
 	public void initialize(String videoFolder) {
 		try {			
-			avTuple = new AVTuple(new Video(videoFolder), videoFolder);
-			avStack.push(avTuple);
+			avStack.push(new AVTuple(new Video(videoFolder), videoFolder));
 		}catch(Exception e) {}
 		
 		
@@ -179,6 +172,3 @@ public class HyperMediaPlayer {
 		frame.getContentPane().add(stopButton);
 	}
 }
-
-
-
