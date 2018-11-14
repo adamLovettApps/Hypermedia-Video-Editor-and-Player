@@ -25,12 +25,10 @@ public class HyperMediaPlayer {
 	private BufferedImage img = new BufferedImage(352, 288, BufferedImage.TYPE_INT_RGB);
 	private JFrame frame;
 	private JLabel videoFrame;
-	private File imgFile = null;
-	private InputStream imgStream;
-	private Video startVideo;	
 	private static int frameCounter = 0;
 	private static int timerDelay = 0;
-	private Deque<AVTuple> avStack = new ArrayDeque<AVTuple>();
+	private Deque<Video> videoStack = new ArrayDeque<Video>();
+	private VideoLink[][] linkArray;
 	
 	public static void main(String[] args) {
 		String videoFolder = args[0];
@@ -56,7 +54,7 @@ public class HyperMediaPlayer {
 
 	public void initialize(String videoFolder) {
 		try {			
-			avStack.push(new AVTuple(new Video(videoFolder), videoFolder));
+			videoStack.push(new Video(videoFolder));
 		}catch(Exception e) {}
 		
 		
@@ -70,32 +68,33 @@ public class HyperMediaPlayer {
 		videoFrame = new JLabel(new ImageIcon(img));
 		ActionListener videoListener = new ActionListener(){
 		    public void actionPerformed(ActionEvent e){		    	
-		    	if (avStack.getFirst().getVideo().getCurrentFrameNum() < avStack.getFirst().getVideo().getDuration()) {
-		    		if ((avStack.getFirst().getVideo().getCurrentFrameNum() <= Math.floor(avStack.getFirst().getClip().getMicrosecondPosition()/((double)avStack.getFirst().getClip().getMicrosecondLength()/(double)avStack.getFirst().getVideo().getDuration())))) {
+		    	if (videoStack.getFirst().getCurrentFrameNum() < videoStack.getFirst().getDuration()) {
+		    		if ((videoStack.getFirst().getCurrentFrameNum() <= Math.floor(videoStack.getFirst().getClip().getMicrosecondPosition()
+		    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration())))) {
 		    			//System.out.println(avStack.getFirst().getClip().getMicrosecondPosition());
 		    			//System.out.println(frameCounter);
-		    			img = avStack.getFirst().getVideo().getCurrentFrame().getFrameBytes();
+		    			img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
 		    			videoFrame.setIcon(new ImageIcon(img));
 		    			videoFrame.repaint();  	
 		    			try {
-		    				avStack.getFirst().getVideo().setCurrentFrame(frameCounter);
+		    				videoStack.getFirst().setCurrentFrame(frameCounter);
 		    			}catch(Exception ex) {}
 		    			frameCounter++;
 		    		}
 		    	}
 		    	else {
-		    		if (avStack.size() > 1) {
-		    			avStack.pop();
-		    			frameCounter = avStack.getFirst().getVideo().getCurrentFrameNum();
-		    			avStack.getFirst().getClip().start();
+		    		if (videoStack.size() > 1) {
+		    			videoStack.pop();
+		    			frameCounter = videoStack.getFirst().getCurrentFrameNum();
+		    			videoStack.getFirst().getClip().start();
 		    		}
 		    		else {
-		    			avStack.getFirst().getClip().stop();
-						avStack.getFirst().getClip().setMicrosecondPosition(0);
+		    			videoStack.getFirst().getClip().stop();
+		    			videoStack.getFirst().getClip().setMicrosecondPosition(0);
 						try {
-							avStack.getFirst().getVideo().setCurrentFrame(0);
+							videoStack.getFirst().setCurrentFrame(0);
 						}catch(Exception excep) {}
-						img = avStack.getFirst().getVideo().getCurrentFrame().getFrameBytes();
+						img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
 		  				videoFrame.setIcon(new ImageIcon(img));
 						videoFrame.repaint();
 						frameCounter = 0;
@@ -112,18 +111,38 @@ public class HyperMediaPlayer {
 			public void mouseClicked(MouseEvent e) {
 				int x=e.getX();
 			    int y=e.getY();
-			    //System.out.println(x+","+y);
-			    avStack.getFirst().getClip().stop();
-			    videoTimer.stop();
 			    
-			    try {
-			    	Video nextVideo = new Video("USCTwo");
-		
-			    	avStack.push(new AVTuple(nextVideo, "USCTwo"));
-			    }catch(Exception ex) {}
-			    frameCounter = 0;
-			    avStack.getFirst().getClip().start();
-			    videoTimer.start();			    
+			    if (videoStack.getFirst().isHyper()) {
+			    	
+			    	VideoLink[] links = videoStack.getFirst().getCurrentVideoLinks();
+			    	
+			    	for (int i = 0; i <links.length ; i++) {
+			    		if (links[i] == null) {
+			    			break;
+			    		}
+			    		else {
+			    			if (links[i].getLinkLocation().contains(x,y)) {
+			    				videoStack.getFirst().getClip().stop();
+						    	videoTimer.stop();
+						    	try {		
+						    		//videoStack.push(links[i].getVideo());
+						    		videoStack.push(new Video(links[i].getPath()));
+						    		videoStack.getFirst().setCurrentFrame(links[i].getFrameStart());
+						    	}catch(Exception ex) {}
+						    	
+						    	frameCounter = links[i].getFrameStart();		
+						    	videoStack.getFirst().getClip().setMicrosecondPosition((long)Math.floor((double)videoStack.getFirst().getClip().getMicrosecondLength()
+						    			*(double)videoStack.getFirst().getCurrentFrameNum()/(double)videoStack.getFirst().getDuration()));
+						    	
+						    	videoStack.getFirst().getClip().start();
+						    	videoTimer.start();
+						    	System.out.println(videoStack.size());
+			    			}
+			    			
+			    			
+			    		}
+			    	}
+			    }
 			}
 		});
 		videoFrame.setBackground(Color.BLACK);
@@ -134,7 +153,7 @@ public class HyperMediaPlayer {
 		playButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				avStack.getFirst().getClip().start();
+				videoStack.getFirst().getClip().start();
 				videoTimer.start();
 			}
 		});
@@ -145,7 +164,7 @@ public class HyperMediaPlayer {
 		pauseButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				avStack.getFirst().getClip().stop();
+				videoStack.getFirst().getClip().stop();
 				videoTimer.stop();
 			}
 		});
@@ -157,11 +176,11 @@ public class HyperMediaPlayer {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					avStack.getFirst().getClip().stop();
+					videoStack.getFirst().getClip().stop();
 					videoTimer.stop();
-					avStack.getFirst().getClip().setMicrosecondPosition(0);
-					avStack.getFirst().getVideo().setCurrentFrame(0);
-					img = avStack.getFirst().getVideo().getCurrentFrame().getFrameBytes();
+					videoStack.getFirst().getClip().setMicrosecondPosition(0);
+					videoStack.getFirst().setCurrentFrame(0);
+					img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
 	  				videoFrame.setIcon(new ImageIcon(img));
 					videoFrame.repaint();
 					frameCounter = 0;

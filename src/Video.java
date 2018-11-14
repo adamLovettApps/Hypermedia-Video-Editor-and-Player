@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.AudioSystem;
 
 // Name: Adam Lovett & Brent Illingworth
 // CSCI 576 Final Project
@@ -29,6 +31,7 @@ public class Video {
     private VideoLink[][] linkArray;
     private Boolean isHyper;
     private FileInputStream audioStream;
+    private Clip clip; 
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
@@ -68,7 +71,7 @@ public class Video {
                 double dw = (endRect.getWidth() -  startRect.getWidth()) / dur;
                 double dh = (endRect.getHeight() -  startRect.getHeight()) / dur;
 
-                Video video = new Video(vals[10]); //recursive - be careful with test files
+                //Video video = new Video(vals[10]); //recursive - be careful with test files
                 for (int i = startFrame; i <= endFrame; i++) {
                     int j = 0;
                     while(linkArray[i][j] != null) {
@@ -79,7 +82,8 @@ public class Video {
                     int newW = (int) Math.round(startRect.getWidth() + dw * (i - startFrame));
                     int newH = (int) Math.round(startRect.getHeight() + dh * (i - startFrame));
                     Rectangle rect = new Rectangle(newX, newY, newW, newH);
-                    linkArray[i][j] = new VideoLink(video, Integer.parseInt(vals[11]), rect);
+                    //linkArray[i][j] = new VideoLink(video, Integer.parseInt(vals[11]), rect);
+                    linkArray[i][j] = new VideoLink(Integer.parseInt(vals[11]), rect, vals[10]);
                 }   
             }
             br.close();
@@ -87,7 +91,12 @@ public class Video {
         
         //Create audioStream from wav file
         File[] wavFile = dir.listFiles((d, name) -> name.endsWith(".wav"));
-        this.audioStream = new FileInputStream(wavFile[0]);
+        //this.audioStream = new FileInputStream(wavFile[0]);
+        try {
+    		this.clip = AudioSystem.getClip();
+    		this.clip.open(AudioSystem.getAudioInputStream(wavFile[0]));    		
+    		
+    	}catch(Exception e) {}
     }
     
     public int getCurrentFrameNum() {
@@ -114,6 +123,10 @@ public class Video {
     //assumes 16 bits per sample at 44.1kHz
     public long getCurrentAudioOffset() {
         return currentFrame * 2 * 1470;
+    }
+    
+    public Clip getClip() {
+    	return this.clip;
     }
     
     public boolean isHyper() {
