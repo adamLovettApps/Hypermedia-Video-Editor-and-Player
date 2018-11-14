@@ -72,7 +72,12 @@ public class HyperMediaPlayer {
 		    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration())))) {
 		    			//System.out.println(avStack.getFirst().getClip().getMicrosecondPosition());
 		    			//System.out.println(frameCounter);
-		    			img = videoStack.getFirst().getCurrentFrame().getFrameBytes(videoStack.getFirst().getCurrentVideoLinks());
+		    			if (videoStack.getFirst().isHyper()) {
+		    				img = videoStack.getFirst().getCurrentFrame().getFrameBytes(videoStack.getFirst().getCurrentVideoLinks());
+		    			}
+		    			else {
+		    				img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+		    			}
 		    			videoFrame.setIcon(new ImageIcon(img));		    	
 		    			videoFrame.repaint();  
 		    			
