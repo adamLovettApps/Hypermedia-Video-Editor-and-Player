@@ -57,7 +57,7 @@ public class Video {
             BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
             String line;
             while ((line = br.readLine()) != null) {
-                System.out.println (line);
+                //System.out.println (line);
                 String[] vals = line.split(" ");
                 Rectangle startRect = new Rectangle(Integer.parseInt(vals[2]), Integer.parseInt(vals[3]), Integer.parseInt(vals[4]), Integer.parseInt(vals[5]));
                 Rectangle endRect = new Rectangle(Integer.parseInt(vals[6]), Integer.parseInt(vals[7]), Integer.parseInt(vals[8]), Integer.parseInt(vals[9]));

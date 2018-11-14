@@ -45,8 +45,7 @@ public class HyperMediaPlayer {
 				}
 			}
 		
-		});
-		
+		});		
 	}
 	
 	public HyperMediaPlayer() {
@@ -56,8 +55,7 @@ public class HyperMediaPlayer {
 		try {			
 			videoStack.push(new Video(videoFolder));
 		}catch(Exception e) {}
-		
-		
+				
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.DARK_GRAY);
 		frame.setBounds(200, 100, 560, 350);
@@ -66,6 +64,7 @@ public class HyperMediaPlayer {
 		frame.getContentPane().setLayout(null);
 		
 		videoFrame = new JLabel(new ImageIcon(img));
+		
 		ActionListener videoListener = new ActionListener(){
 		    public void actionPerformed(ActionEvent e){		    	
 		    	if (videoStack.getFirst().getCurrentFrameNum() < videoStack.getFirst().getDuration()) {
@@ -73,9 +72,10 @@ public class HyperMediaPlayer {
 		    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration())))) {
 		    			//System.out.println(avStack.getFirst().getClip().getMicrosecondPosition());
 		    			//System.out.println(frameCounter);
-		    			img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
-		    			videoFrame.setIcon(new ImageIcon(img));
-		    			videoFrame.repaint();  	
+		    			img = videoStack.getFirst().getCurrentFrame().getFrameBytes(videoStack.getFirst().getCurrentVideoLinks());
+		    			videoFrame.setIcon(new ImageIcon(img));		    	
+		    			videoFrame.repaint();  
+		    			
 		    			try {
 		    				videoStack.getFirst().setCurrentFrame(frameCounter);
 		    			}catch(Exception ex) {}
@@ -136,15 +136,14 @@ public class HyperMediaPlayer {
 						    	
 						    	videoStack.getFirst().getClip().start();
 						    	videoTimer.start();
-						    	System.out.println(videoStack.size());
-			    			}
-			    			
-			    			
+						    	//System.out.println(videoStack.size());
+			    			}			    						    			
 			    		}
 			    	}
 			    }
 			}
 		});
+		
 		videoFrame.setBackground(Color.BLACK);
 		videoFrame.setBounds(20, 20, 352, 288);
 		frame.getContentPane().add(videoFrame);
