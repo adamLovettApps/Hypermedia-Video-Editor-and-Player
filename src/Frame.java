@@ -2,6 +2,7 @@
 // CSCI 576 Final Project
 // Fall 2018
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
@@ -19,6 +20,7 @@ public class Frame {
     public static final int BLUE = 2;
     public static final int WIDTH = 352;
     public static final int HEIGHT = 288;
+    public static final float BRIGHTNESS_FACTOR = 2.0f;
     
     private byte[] data;
     
@@ -53,7 +55,8 @@ public class Frame {
     
     public BufferedImage getFrameBytes(VideoLink[] links) {
         BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        int ind = 0; 
+        int ind = 0;
+        float[] hsbvals = { 0, 0, 0 };
         for(int y = 0; y < HEIGHT; y++){
             for(int x = 0; x < WIDTH; x++){
                 byte r = data[ind + getColorOffset(RED)];
@@ -67,10 +70,22 @@ public class Frame {
 		    		}
 		    		else {
 		    			if (links[i].getLinkLocation().contains(x,y)) {
-		    				final int bitFlip = 6;
+		    				
+		    				//Convert colors to HSB Color Space
+		    				Color.RGBtoHSB(ByteToInt(r), ByteToInt(g), ByteToInt(b), hsbvals );
+		    				//Brighten
+		    				float newBrightness = BRIGHTNESS_FACTOR * hsbvals[2];
+		    				if (newBrightness > 1.0) {newBrightness = 1.0f;}
+		    				Color c = new Color( Color.HSBtoRGB( hsbvals[0], hsbvals[1], newBrightness));
+		    				r = (byte) c.getRed();
+		    				g = (byte) c.getGreen();
+		    				b = (byte) c.getBlue();
+		    				
+		    				//final int bitFlip = 6;
 		    				//r = (byte) (r ^ (1 << bitFlip));
-		    				g = (byte) (g ^ (1 << bitFlip));
-		    				b = (byte) (b ^ (1 << bitFlip));
+		    				//g = (byte) (g ^ (1 << bitFlip));
+		    				//b = (byte) (b ^ (1 << bitFlip));
+		    				
 		    				
 		    				//r = (byte) (r ^ (1 << bitFlip-1));
 		    				//g = (byte) (g ^ (1 << bitFlip-1));
@@ -110,5 +125,9 @@ public class Frame {
     
     private int getColorOffset(int color) {
         return HEIGHT * WIDTH * color;
-    }   
+    }
+    
+    static int ByteToInt(byte b){
+        return (int)(b & 0x000000FF);
+    }
 }
