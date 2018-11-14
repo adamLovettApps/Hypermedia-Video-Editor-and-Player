@@ -66,7 +66,7 @@ public class Frame {
                 
                 for (int i = 0; i < links.length; i++) {
                 	if (links[i] == null) {
-		    			break;
+		    			break;1.9
 		    		}
 		    		else {
 		    			if (links[i].getLinkLocation().contains(x,y)) {
@@ -127,7 +127,4 @@ public class Frame {
         return HEIGHT * WIDTH * color;
     }
     
-    static int ByteToInt(byte b){
-        return (int)(b & 0x000000FF);
-    }
 }
