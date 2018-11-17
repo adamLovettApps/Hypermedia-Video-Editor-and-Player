@@ -21,6 +21,7 @@ public class Frame {
     public static final int WIDTH = 352;
     public static final int HEIGHT = 288;
     public static final float BRIGHTNESS_FACTOR = 2.0f;
+    public static final float BRIGHTNESS_FACTOR2 = 0.6f;
     
     private byte[] data;
     
@@ -74,14 +75,20 @@ public class Frame {
 		    				//Convert colors to HSB Color Space
 		    				Color.RGBtoHSB(ByteToInt(r), ByteToInt(g), ByteToInt(b), hsbvals );
 		    				//Brighten
-		    				float newBrightness = BRIGHTNESS_FACTOR * hsbvals[2];
+		    				float newBrightness;
+		    				if (hsbvals[2] > 0.5) {
+		    					newBrightness = BRIGHTNESS_FACTOR2 * hsbvals[2];
+		    				}
+		    				else {
+		    					newBrightness = BRIGHTNESS_FACTOR * hsbvals[2];
+		    				}
 		    				if (newBrightness > 1.0) {newBrightness = 1.0f;}
 		    				Color c = new Color( Color.HSBtoRGB( hsbvals[0], hsbvals[1], newBrightness));
 		    				r = (byte) c.getRed();
 		    				g = (byte) c.getGreen();
 		    				b = (byte) c.getBlue();
 		    				
-		    				//final int bitFlip = 6;
+		    				//final int bitFlip = 5;
 		    				//r = (byte) (r ^ (1 << bitFlip));
 		    				//g = (byte) (g ^ (1 << bitFlip));
 		    				//b = (byte) (b ^ (1 << bitFlip));
