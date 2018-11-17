@@ -31,10 +31,12 @@ public class Video {
     private VideoLink[][] linkArray;
     private Boolean isHyper;
     private FileInputStream audioStream;
-    private Clip clip; 
+    private Clip clip;
+    private String folderPath;
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
+        this.folderPath = folderPath;
         
         //setup rgbFiles to be sorted list of file paths
         File dir = new File(folderPath);
@@ -135,6 +137,10 @@ public class Video {
     
     public int getDuration() {
         return rgbFiles.length;
+    }
+    
+    public String getPath() {
+        return folderPath;
     }
     
     private void bufferFrames() throws IOException {

@@ -1,6 +1,4 @@
-import java.awt.EventQueue;
 import javax.swing.JFrame;
-import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -28,7 +26,12 @@ public class HyperMediaTool {
 	private Video targetVideo;
 	private File[] directories;
 	private ArrayList<String> inputFolders = new ArrayList<String>();
-
+	private ArrayList<Hyperlink> links;
+    private int currSourceFrameStartNum;
+    private int curSourceFrameEndNum;
+    private Rectangle currSourceRectStart;
+    private Rectangle currSourceRectEnd;
+    private String targetVideoPath;
 	/**
 	 * Launch the application.
 	 */
@@ -51,7 +54,12 @@ public class HyperMediaTool {
 	 * Create the application.
 	 */
 	public HyperMediaTool() {
-		
+	    links = new ArrayList<Hyperlink>();
+	    currSourceFrameStartNum = -1;
+	    curSourceFrameEndNum = -1;
+	    currSourceRectStart = new Rectangle();
+	    currSourceRectEnd = new Rectangle();
+	    targetVideoPath = null;
 	}
 
 	/**
@@ -185,6 +193,11 @@ public class HyperMediaTool {
 		addLink.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+			    try {
+			        String name = linkName.getText();
+			        Hyperlink newLink = new Hyperlink(name, currSourceFrameStartNum, curSourceFrameEndNum, currSourceRectStart, currSourceRectEnd, targetVideoPath, targetVideo.getCurrentFrameNum());
+                    links.add(newLink);
+                }catch(Exception ex) {}
 			}
 		});
 		addLink.setBounds(756, 158, 176, 29);
@@ -216,10 +229,16 @@ public class HyperMediaTool {
 		linkName.setBounds(760, 227, 168, 26);
 		frame.getContentPane().add(linkName);
 		linkName.setColumns(10);
-		
-		
-		
 	
+	}
+	
+	private void saveHyp() throws IOException {
+	    PrintWriter writer = new PrintWriter(sourceVideo.getPath() + "/0links.hyp", "UTF-8");
+	    for (int i = 0; i < this.links.size(); i++) {
+	        String line = this.links.get(i).getHypLine();
+	        writer.println(line);
+	    }
+	    writer.close();
 	}
 	
 }
