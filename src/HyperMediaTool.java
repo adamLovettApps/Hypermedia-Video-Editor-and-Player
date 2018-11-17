@@ -233,7 +233,10 @@ public class HyperMediaTool {
 	}
 	
 	private void saveHyp() throws IOException {
-	    PrintWriter writer = new PrintWriter(sourceVideo.getPath() + "/0links.hyp", "UTF-8");
+	    File dir = new File(sourceVideo.getPath());
+	    String name = "0links.hyp";
+	    File fullPath = new File(dir, name);
+	    PrintWriter writer = new PrintWriter(fullPath, "UTF-8");
 	    for (int i = 0; i < this.links.size(); i++) {
 	        String line = this.links.get(i).getHypLine();
 	        writer.println(line);
