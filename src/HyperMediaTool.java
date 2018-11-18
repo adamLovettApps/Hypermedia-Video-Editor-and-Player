@@ -253,9 +253,10 @@ public class HyperMediaTool extends JFrame{
 						currentHyperlink.setStartRect(sourceVideoFrame.getCurrentRect());
 						sourceVideoFrame.setCurrentRectColor();
 						if(currentHyperlink.getEndFrame() <= currentHyperlink.getStartFrame()) {
-							currentHyperlink.setEndFrame(sourceVideo.getDuration());
+							currentHyperlink.setEndFrame(sourceVideo.getDuration() - 1);
 							currentHyperlink.setEndRect(sourceVideoFrame.getCurrentRect());
 						}
+						
 						sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
 						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
 						sourceVideoFrame.repaint();
@@ -263,7 +264,6 @@ public class HyperMediaTool extends JFrame{
 						System.out.println(sourceVideoFrame.getCurrentRect().getY());
 						System.out.println(sourceVideoFrame.getCurrentRect().getWidth());
 						System.out.println(sourceVideoFrame.getCurrentRect().getHeight());
-						sourceVideoFrame.setCurrentRectNull();
 					}
 				}
 			}
