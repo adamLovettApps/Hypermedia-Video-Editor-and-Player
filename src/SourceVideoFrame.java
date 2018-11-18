@@ -76,6 +76,17 @@ public class SourceVideoFrame extends JLabel {
     	return this.currentRect;
     }
     
+    public void setCurrentRectNull() {
+    	startingX = null;
+    	startingY = null;
+    	currentX = null;
+    	currentY = null;	
+    	rectColor = Color.green;
+    	currentRect = new Rectangle(0, 0, 0, 0);
+    	currentRect = null;
+    	SourceVideoFrame.this.repaint();
+    }
+    
     public void setCurrentRectColor() {
     	rectColor = Color.red;
     	paintComponent(this.getGraphics());
@@ -105,6 +116,7 @@ public class SourceVideoFrame extends JLabel {
         	currentY = null;	
         	rectColor = Color.green;
         	currentRect = new Rectangle(0, 0, 0, 0);
+        	currentRect = null;
         	SourceVideoFrame.this.repaint();
         }
      }    

@@ -8,6 +8,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.awt.Rectangle;
 
 /**
  * Frame Class
@@ -22,6 +24,7 @@ public class Frame {
     public static final int HEIGHT = 288;
     public static final float BRIGHTNESS_FACTOR = 2.0f;
     public static final float BRIGHTNESS_FACTOR2 = 0.6f;
+    private static Rectangle currentRect;
     
     private byte[] data;
     
@@ -125,7 +128,81 @@ public class Frame {
         return img;
     }
     
-    
+    public BufferedImage getFrameBytes(ArrayList<Hyperlink> links, int frameNum, String targetLink) {
+        BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Color c;
+        int ind = 0;
+        float[] hsbvals = { 0, 0, 0 };
+        for(int y = 0; y < HEIGHT; y++){
+            for(int x = 0; x < WIDTH; x++){
+                byte r = data[ind + getColorOffset(RED)];
+                byte g = data[ind + getColorOffset(GREEN)];
+                byte b = data[ind + getColorOffset(BLUE)];
+                
+                
+                for (int i = 0; i < links.size(); i++) {
+                	if (links.get(i) == null) {
+		    			break;
+		    		}
+		    		else {
+		    			if ((frameNum >= links.get(i).getStartFrame()) && (frameNum <= links.get(i).getEndFrame())) {
+		    				int startFrame = links.get(i).getStartFrame();
+		                    int endFrame = links.get(i).getEndFrame();
+		                    int dur = endFrame - startFrame;
+		                    double dx = (links.get(i).getEndRect().getX() -  links.get(i).getStartRect().getX()) / dur;
+		                    double dy = (links.get(i).getEndRect().getY() -  links.get(i).getStartRect().getY()) / dur;
+		                    double dw = (links.get(i).getEndRect().getWidth() -  links.get(i).getStartRect().getWidth()) / dur;
+		                    double dh = (links.get(i).getEndRect().getHeight() -  links.get(i).getStartRect().getHeight()) / dur;
+		                    
+		                    
+		                    int newX = (int) Math.round(links.get(i).getStartRect().getX() + dx * (frameNum - links.get(i).getStartFrame()));
+		                    int newY = (int) Math.round(links.get(i).getStartRect().getY() + dy * (frameNum - links.get(i).getStartFrame()));
+		                    int newW = (int) Math.round(links.get(i).getStartRect().getWidth() + dw * (frameNum - links.get(i).getStartFrame()));
+		                    int newH = (int) Math.round(links.get(i).getStartRect().getHeight() + dh * (frameNum - links.get(i).getStartFrame()));
+		                    
+		                    if (links.get(i).getName().equals(targetLink)) {
+		                    	c = Color.red;
+		                    }
+		                    else {
+		                    	c = Color.yellow;
+		                    }
+		                    
+		                    if ((x == newX) && (y >= newY) && (y < (newY + newH))) {
+		                    	
+		                    	r = (byte) c.getRed();
+			    				g = (byte) c.getGreen();
+			    				b = (byte) c.getBlue();
+		                    }
+		                    else if ((x == (newX + newW -1)) && (y >= newY) && (y < (newY + newH))) {
+		                    	
+		                    	r = (byte) c.getRed();
+			    				g = (byte) c.getGreen();
+			    				b = (byte) c.getBlue();
+		                    }
+		                    else if ((y == newY) && (x >= newX) && (x < (newX + newW))) {
+		                    	
+		                    	r = (byte) c.getRed();
+			    				g = (byte) c.getGreen();
+			    				b = (byte) c.getBlue();
+		                    }
+		                    else if ((y == (newY + newH -1)) && (x >= newX) && (x < (newX + newW))) {
+		                    	
+		                    	r = (byte) c.getRed();
+			    				g = (byte) c.getGreen();
+			    				b = (byte) c.getBlue();
+		                    }
+		                    
+		    			}
+		    		}
+                }
+                
+                int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+                img.setRGB(x,y,pix);
+                ind++;
+            }
+        } 
+        return img;
+    }
     
     
     

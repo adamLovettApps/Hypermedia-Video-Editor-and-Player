@@ -32,6 +32,22 @@ public class Hyperlink {
         return this.name;
     }
     
+    public int getStartFrame() {
+        return this.startFrame;
+    }
+    
+    public int getEndFrame() {
+        return this.endFrame;
+    }
+    
+    public Rectangle getStartRect() {
+        return this.startRect;
+    }
+    
+    public Rectangle getEndRect() {
+        return this.endRect;
+    }
+      
     public void setStartFrame(int frameNumber) {
     	this.startFrame = frameNumber;
     }
@@ -49,7 +65,7 @@ public class Hyperlink {
     }
     
     public String getHypLine() {
-        String [] fields = new String[12];
+        String [] fields = new String[13];
         fields[0] = Integer.toString(this.startFrame);
         fields[1] = Integer.toString(this.endFrame);
         fields[2] = Integer.toString(startRect.height);
@@ -62,6 +78,7 @@ public class Hyperlink {
         fields[9] = Integer.toString(endRect.y);
         fields[10] = this.videoPath;
         fields[11] = Integer.toString(this.targetFrame);
+        fields[12] = this.name;
         
         String line = fields[0];
         

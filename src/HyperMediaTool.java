@@ -59,10 +59,10 @@ public class HyperMediaTool extends JFrame{
 	 */
 	public HyperMediaTool() {
 	    links = new ArrayList<Hyperlink>();
-	    currSourceFrameStartNum = -1;
-	    curSourceFrameEndNum = -1;
-	    currSourceRectStart = new Rectangle();
-	    currSourceRectEnd = new Rectangle();
+	    currSourceFrameStartNum = 0;
+	    curSourceFrameEndNum = 0;
+	    currSourceRectStart = new Rectangle(0, 0, 0, 0);
+	    currSourceRectEnd = new Rectangle(0, 0, 0, 0);
 	    targetVideoPath = null;
 	}
 
@@ -74,6 +74,7 @@ public class HyperMediaTool extends JFrame{
 		try {
 			sourceVideo = new Video(sourceVideoFolder);
 		}catch(Exception e) {}
+		
 		
 		directories = new File(System.getProperty("user.dir")).listFiles(File::isDirectory);
 		
@@ -96,7 +97,8 @@ public class HyperMediaTool extends JFrame{
 		    }
 		});
 		
-		sourceImg = sourceVideo.getCurrentFrame().getFrameBytes();
+		sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), "");
+		
 		
 		SourceVideoFrame sourceVideoFrame = new SourceVideoFrame(new ImageIcon(sourceImg));
 		sourceVideoFrame.setBackground(Color.BLACK);
@@ -132,8 +134,8 @@ public class HyperMediaTool extends JFrame{
 			public void stateChanged(ChangeEvent e) {
 				sourceText.setText("Frame " + Integer.toString(sourceSlider.getValue()));
 				try {
-					sourceVideo.setCurrentFrame(sourceSlider.getValue() - 1);
-					sourceImg = sourceVideo.getCurrentFrame().getFrameBytes();
+					sourceVideo.setCurrentFrame(sourceSlider.getValue() - 1);					
+					sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
 					sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
 				}catch(Exception ex) {}
 				sourceVideoFrame.repaint();
@@ -224,6 +226,9 @@ public class HyperMediaTool extends JFrame{
 			        		selectHyperLink.setSelectedItem(newLink.getName());
 			        		linkName.setText("");
 			        	}
+			        	sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+						sourceVideoFrame.repaint();
 			        	
 			        }
                 }catch(Exception ex) {}
@@ -241,7 +246,11 @@ public class HyperMediaTool extends JFrame{
 						currentHyperlink.setStartFrame(sourceVideo.getCurrentFrameNum());
 						currentHyperlink.setStartRect(sourceVideoFrame.getCurrentRect());
 						sourceVideoFrame.setCurrentRectColor();
-						System.out.println("TEST");
+						if(currentHyperlink.getEndFrame() <= currentHyperlink.getStartFrame()) {
+							currentHyperlink.setEndFrame(sourceVideo.getDuration());
+							currentHyperlink.setEndRect(sourceVideoFrame.getCurrentRect());
+						}
+						//System.out.println("TEST");
 					}
 				}
 			}
@@ -258,7 +267,14 @@ public class HyperMediaTool extends JFrame{
 						if(currentHyperlink != null) {
 							currentHyperlink.setEndFrame(sourceVideo.getCurrentFrameNum());
 							currentHyperlink.setEndRect(sourceVideoFrame.getCurrentRect());
-							sourceVideoFrame.setCurrentRectColor();
+							if(currentHyperlink.getEndFrame() <= currentHyperlink.getStartFrame()) {
+								currentHyperlink.setStartFrame(0);
+								currentHyperlink.setStartRect(sourceVideoFrame.getCurrentRect());
+							}
+							sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+							sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+							sourceVideoFrame.repaint();
+							sourceVideoFrame.setCurrentRectNull();
 						}
 					}
 				}
@@ -268,6 +284,7 @@ public class HyperMediaTool extends JFrame{
 		frame.getContentPane().add(setEndBounds);
 		
 		selectHyperLink = new JComboBox<String>();
+		selectHyperLink.addItem("Select a Link");
 		selectHyperLink.setBounds(756, 89, 176, 27);
 		frame.getContentPane().add(selectHyperLink);
 		selectHyperLink.addItemListener(new ItemListener() {
@@ -276,7 +293,10 @@ public class HyperMediaTool extends JFrame{
 	            if(e.getStateChange() == ItemEvent.SELECTED) {
 	               for (int i=0; i < links.size(); i++) {
 	            	   if (links.get(i).getName().equals(selectHyperLink.getSelectedItem().toString())) {
-	            		   currentHyperlink = links.get(i);
+	            		   	currentHyperlink = links.get(i);
+	            		   	sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+							sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+							sourceVideoFrame.repaint();
 	            	   }
 	               }
 	            }
