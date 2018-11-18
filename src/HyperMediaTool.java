@@ -259,11 +259,9 @@ public class HyperMediaTool extends JFrame{
 						
 						sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
 						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+						sourceVideoFrame.setCurrentRectNull();
 						sourceVideoFrame.repaint();
-						System.out.println(sourceVideoFrame.getCurrentRect().getX());
-						System.out.println(sourceVideoFrame.getCurrentRect().getY());
-						System.out.println(sourceVideoFrame.getCurrentRect().getWidth());
-						System.out.println(sourceVideoFrame.getCurrentRect().getHeight());
+					
 					}
 				}
 			}
