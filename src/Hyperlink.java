@@ -70,12 +70,12 @@ public class Hyperlink {
         fields[1] = Integer.toString(this.endFrame);
         fields[2] = Integer.toString(startRect.x);
         fields[3] = Integer.toString(startRect.y);
-        fields[4] = Integer.toString(startRect.height);
-        fields[5] = Integer.toString(startRect.width);
+        fields[4] = Integer.toString(startRect.width);
+        fields[5] = Integer.toString(startRect.height);
         fields[6] = Integer.toString(endRect.x);
         fields[7] = Integer.toString(endRect.y);
-        fields[8] = Integer.toString(endRect.height);
-        fields[9] = Integer.toString(endRect.width);
+        fields[8] = Integer.toString(endRect.width);
+        fields[9] = Integer.toString(endRect.height);
         fields[10] = this.videoPath;
         fields[11] = Integer.toString(this.targetFrame);
         fields[12] = this.name;
