@@ -157,8 +157,13 @@ public class HyperMediaTool extends JFrame{
 		
 		final JSlider targetSlider = new JSlider();
 		targetSlider.setMinimum(1);
-		targetSlider.setMaximum(9000);
-		targetSlider.setValue(0);
+		if(targetVideo != null) {
+			targetSlider.setMaximum(targetVideo.getDuration());
+		}
+		else {
+			targetSlider.setMaximum(1);
+		}
+		targetSlider.setValue(1);
 		targetSlider.setPaintTicks(true);
 		targetSlider.setPaintLabels(true);
 		targetSlider.addChangeListener(new ChangeListener() {
@@ -168,6 +173,7 @@ public class HyperMediaTool extends JFrame{
 					targetVideo.setCurrentFrame(targetSlider.getValue() - 1);
 					targetImg = targetVideo.getCurrentFrame().getFrameBytes();
 					targetVideoFrame.setIcon(new ImageIcon(targetImg));
+					targetSlider.setMaximum(targetVideo.getDuration());
 				}catch(Exception ex) {}
 				targetVideoFrame.repaint();
 			}
