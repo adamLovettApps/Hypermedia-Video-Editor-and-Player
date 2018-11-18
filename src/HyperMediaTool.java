@@ -14,7 +14,7 @@ import java.io.*;
 import java.lang.String;
 import java.util.ArrayList;
 
-public class HyperMediaTool {
+public class HyperMediaTool extends JFrame{
 
 	private BufferedImage sourceImg = new BufferedImage(352, 288, BufferedImage.TYPE_INT_RGB);
 	private BufferedImage targetImg = new BufferedImage(352, 288, BufferedImage.TYPE_INT_RGB);
@@ -32,6 +32,8 @@ public class HyperMediaTool {
     private Rectangle currSourceRectStart;
     private Rectangle currSourceRectEnd;
     private String targetVideoPath;
+    private Rectangle myOffice = new Rectangle(150, 50, 30, 20);
+  
 	/**
 	 * Launch the application.
 	 */
@@ -86,8 +88,7 @@ public class HyperMediaTool {
 		
 		sourceImg = sourceVideo.getCurrentFrame().getFrameBytes();
 		
-		
-		JLabel sourceVideoFrame = new JLabel(new ImageIcon(sourceImg));
+		SourceVideoFrame sourceVideoFrame = new SourceVideoFrame(new ImageIcon(sourceImg));
 		sourceVideoFrame.setBackground(Color.BLACK);
 		sourceVideoFrame.setBounds(20, 20, 352, 288);
 		frame.getContentPane().add(sourceVideoFrame);
@@ -163,11 +164,11 @@ public class HyperMediaTool {
 		targetSlider.setBounds(392, 328, 352, 40);
 		frame.getContentPane().add(targetSlider);
 		
-		JComboBox selectTargetVideo = new JComboBox();
+		JComboBox<String> selectTargetVideo = new JComboBox<String>();
 		selectTargetVideo.setBounds(756, 20, 176, 29);
 		frame.getContentPane().add(selectTargetVideo);
 		for (int i =0; i < inputFolders.size(); i++) {
-			selectTargetVideo.addItem(inputFolders.get(i));
+			selectTargetVideo.addItem((String)inputFolders.get(i));
 		}	
 		selectTargetVideo.addItemListener(new ItemListener() {
 	        @Override
@@ -243,5 +244,6 @@ public class HyperMediaTool {
 	    }
 	    writer.close();
 	}
+	
 	
 }
