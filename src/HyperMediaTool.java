@@ -97,8 +97,8 @@ public class HyperMediaTool extends JFrame{
 		    }
 		});
 		
-		sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), "");
-		
+
+		sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), "");		
 		
 		SourceVideoFrame sourceVideoFrame = new SourceVideoFrame(new ImageIcon(sourceImg));
 		sourceVideoFrame.setBackground(Color.BLACK);
@@ -256,10 +256,14 @@ public class HyperMediaTool extends JFrame{
 							currentHyperlink.setEndFrame(sourceVideo.getDuration());
 							currentHyperlink.setEndRect(sourceVideoFrame.getCurrentRect());
 						}
-						sourceVideoFrame.setCurrentRectNull();
 						sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
 						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
 						sourceVideoFrame.repaint();
+						System.out.println(sourceVideoFrame.getCurrentRect().getX());
+						System.out.println(sourceVideoFrame.getCurrentRect().getY());
+						System.out.println(sourceVideoFrame.getCurrentRect().getWidth());
+						System.out.println(sourceVideoFrame.getCurrentRect().getHeight());
+						sourceVideoFrame.setCurrentRectNull();
 					}
 				}
 			}
