@@ -127,7 +127,7 @@ public class HyperMediaTool extends JFrame{
 		final JSlider sourceSlider = new JSlider();
 		sourceSlider.setMinimum(1);
 		sourceSlider.setMaximum(9000);
-		sourceSlider.setValue(0);
+		sourceSlider.setValue(1);
 		sourceSlider.setPaintTicks(true);
 		sourceSlider.setPaintLabels(true);
 		sourceSlider.addChangeListener(new ChangeListener() {
@@ -141,7 +141,7 @@ public class HyperMediaTool extends JFrame{
 				sourceVideoFrame.repaint();
 			}
 		});
-		sourceSlider.setBackground(Color.WHITE);
+		sourceSlider.setBackground(Color.DARK_GRAY);
 		sourceSlider.setBounds(20, 328, 352, 40);
 		frame.getContentPane().add(sourceSlider);
 		
@@ -178,7 +178,7 @@ public class HyperMediaTool extends JFrame{
 				targetVideoFrame.repaint();
 			}
 		});
-		targetSlider.setBackground(Color.WHITE);
+		targetSlider.setBackground(Color.DARK_GRAY);
 		targetSlider.setBounds(392, 328, 352, 40);
 		frame.getContentPane().add(targetSlider);
 		
