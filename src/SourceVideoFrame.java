@@ -15,6 +15,7 @@ public class SourceVideoFrame extends JLabel {
 	private Integer currentY = null;
 	private ImageIcon imgIcon;
 	private Rectangle currentRect;
+	private Color rectColor = Color.green;
 	
 	public SourceVideoFrame(String image) {
 	    this(new ImageIcon(image));
@@ -61,11 +62,11 @@ public class SourceVideoFrame extends JLabel {
         	  rectHeight = currentY - startingY;
           }
           currentRect = new Rectangle(x, y, rectWidth, rectHeight);
-          g.setColor(Color.red); 
+          g.setColor(Color.green); 
           g.drawRect(x, y, rectWidth, rectHeight);
        }   
        if(currentRect != null) {
-    	   g.setColor(Color.red);
+    	   g.setColor(rectColor);
     	   g.drawRect((int)currentRect.getX(), (int)currentRect.getY(), (int)currentRect.getWidth(), (int)currentRect.getHeight());
        }
        
@@ -75,17 +76,24 @@ public class SourceVideoFrame extends JLabel {
     	return this.currentRect;
     }
     
+    public void setCurrentRectColor() {
+    	rectColor = Color.red;
+    	paintComponent(this.getGraphics());
+    }
+    
     private class DrawRectangle extends MouseAdapter {
     	@Override
         public void mousePressed(MouseEvent e) {
             startingX = e.getX();
             startingY = e.getY();
+            rectColor = Color.green;
         }
     	
         @Override
         public void mouseDragged(MouseEvent e) {
         	currentX = e.getX();
         	currentY = e.getY();
+        	rectColor = Color.green;
         	SourceVideoFrame.this.repaint();
         }
         
@@ -94,7 +102,8 @@ public class SourceVideoFrame extends JLabel {
         	startingX = null;
         	startingY = null;
         	currentX = null;
-        	currentY = null;		
+        	currentY = null;	
+        	rectColor = Color.green;
         	currentRect = new Rectangle(0, 0, 0, 0);
         	SourceVideoFrame.this.repaint();
         }

@@ -32,6 +32,21 @@ public class Hyperlink {
         return this.name;
     }
     
+    public void setStartFrame(int frameNumber) {
+    	this.startFrame = frameNumber;
+    }
+    
+    public void setEndFrame(int frameNumber) {
+    	this.endFrame = frameNumber;
+    }
+    
+    public void setStartRect(Rectangle rect) {
+    	this.startRect = rect;
+    }
+    
+    public void setEndRect(Rectangle rect) {
+    	this.endRect = rect;
+    }
     
     public String getHypLine() {
         String [] fields = new String[12];

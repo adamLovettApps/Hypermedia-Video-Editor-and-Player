@@ -22,8 +22,8 @@ import javax.sound.sampled.AudioSystem;
  */
 
 public class Video {
-    public static final int LEADING_FRAME_BUFFER = 30;
-    public static final int TRAILING_FRAME_BUFFER = 30;
+    public static final int LEADING_FRAME_BUFFER = 10;
+    public static final int TRAILING_FRAME_BUFFER = 10;
     public static final int LINK_MAX = 50;
     private int currentFrame;
     private File[] rgbFiles;
@@ -152,5 +152,7 @@ public class Video {
         if (currentFrame >= TRAILING_FRAME_BUFFER) {
             frameArray[currentFrame - TRAILING_FRAME_BUFFER] = null;
         }
+        System.gc();
+        System.runFinalization();
     }   
 }
