@@ -22,7 +22,7 @@ public class Frame {
     public static final int BLUE = 2;
     public static final int WIDTH = 352;
     public static final int HEIGHT = 288;
-    public static final float BRIGHTNESS_FACTOR = 2.0f;
+    public static final float BRIGHTNESS_FACTOR = 1f;
     public static final float BRIGHTNESS_FACTOR2 = 0.6f;
     private static Rectangle currentRect;
     
@@ -57,69 +57,77 @@ public class Frame {
     }
     
     
+//    public BufferedImage getFrameBytes(VideoLink[] links) {
+//        BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+//        int ind = 0;
+//        float[] hsbvals = { 0, 0, 0 };
+//        for(int y = 0; y < HEIGHT; y++){
+//            for(int x = 0; x < WIDTH; x++){
+//                byte r = data[ind + getColorOffset(RED)];
+//                byte g = data[ind + getColorOffset(GREEN)];
+//                byte b = data[ind + getColorOffset(BLUE)];
+//                
+//                
+//                for (int i = 0; i < links.length; i++) {
+//                	if (links[i] == null) {
+//		    			break;
+//		    		}
+//		    		else {
+//		    			if (links[i].getLinkLocation().contains(x,y)) {
+//		    				
+//		    				//Convert colors to HSB Color Space
+//		    				Color.RGBtoHSB(ByteToInt(r), ByteToInt(g), ByteToInt(b), hsbvals );
+//		    				//Brighten
+//		    				float newBrightness;
+//		    				if (hsbvals[2] > 0.5) {
+//		    					newBrightness = BRIGHTNESS_FACTOR2 * hsbvals[2];
+//		    				}
+//		    				else {
+//		    					newBrightness = BRIGHTNESS_FACTOR * hsbvals[2];
+//		    				}
+//		    				if (newBrightness > 1.0) {newBrightness = 1.0f;}
+//		    				Color c = new Color( Color.HSBtoRGB( hsbvals[0], hsbvals[1], newBrightness));
+//		    				r = (byte) c.getRed();
+//		    				g = (byte) c.getGreen();
+//		    				b = (byte) c.getBlue();
+//		    			}
+//		    		}
+//                }
+//                
+//                int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+//                img.setRGB(x,y,pix);
+//                ind++;
+//            }
+//        } 
+//        return img;
+//    }
+    
     public BufferedImage getFrameBytes(VideoLink[] links) {
+        int BORDER_THICKNESS = 1;
+        Color BORDER_COLOR = new Color(57,255,20);
         BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         int ind = 0;
-        float[] hsbvals = { 0, 0, 0 };
         for(int y = 0; y < HEIGHT; y++){
             for(int x = 0; x < WIDTH; x++){
                 byte r = data[ind + getColorOffset(RED)];
                 byte g = data[ind + getColorOffset(GREEN)];
                 byte b = data[ind + getColorOffset(BLUE)];
                 
-                
                 for (int i = 0; i < links.length; i++) {
-                	if (links[i] == null) {
-		    			break;
-		    		}
-		    		else {
-		    			if (links[i].getLinkLocation().contains(x,y)) {
-		    				
-		    				//Convert colors to HSB Color Space
-		    				Color.RGBtoHSB(ByteToInt(r), ByteToInt(g), ByteToInt(b), hsbvals );
-		    				//Brighten
-		    				float newBrightness;
-		    				if (hsbvals[2] > 0.5) {
-		    					newBrightness = BRIGHTNESS_FACTOR2 * hsbvals[2];
-		    				}
-		    				else {
-		    					newBrightness = BRIGHTNESS_FACTOR * hsbvals[2];
-		    				}
-		    				if (newBrightness > 1.0) {newBrightness = 1.0f;}
-		    				Color c = new Color( Color.HSBtoRGB( hsbvals[0], hsbvals[1], newBrightness));
-		    				r = (byte) c.getRed();
-		    				g = (byte) c.getGreen();
-		    				b = (byte) c.getBlue();
-		    				
-		    				//final int bitFlip = 5;
-		    				//r = (byte) (r ^ (1 << bitFlip));
-		    				//g = (byte) (g ^ (1 << bitFlip));
-		    				//b = (byte) (b ^ (1 << bitFlip));
-		    				
-		    				
-		    				//r = (byte) (r ^ (1 << bitFlip-1));
-		    				//g = (byte) (g ^ (1 << bitFlip-1));
-		    				//b = (byte) (b ^ (1 << bitFlip-1));
-		    				
-		    				//r = (byte) (r ^ (1 << bitFlip-2));
-		    				//g = (byte) (g ^ (1 << bitFlip-2));
-		    				//b = (byte) (b ^ (1 << bitFlip-2));
-		    				
-		    				//r = (byte) (r ^ (1 << bitFlip-3));
-		    				//g = (byte) (g ^ (1 << bitFlip-3));
-		    				//b = (byte) (b ^ (1 << bitFlip-3));
-		    				
-		    				//r = (byte) (r ^ (1 << bitFlip-4));
-		    				//g = (byte) (g ^ (1 << bitFlip-4));
-		    				//b = (byte) (b ^ (1 << bitFlip-4));
-		    				
-		    				//r = (byte) (r ^ (1 << bitFlip-5));
-		    				//g = (byte) (g ^ (1 << bitFlip-5));
-		    				//b = (byte) (b ^ (1 << bitFlip-5));
-		    			}
-		    		}
+                    if (links[i] == null) {
+                        break;
+                    }
+                    else {
+                        if (links[i].getLinkLocation().contains(x,y)) {
+                            if (x - links[i].getLinkLocation().x < BORDER_THICKNESS || x - links[i].getLinkLocation().x >= links[i].getLinkLocation().width -  BORDER_THICKNESS
+                                    || y - links[i].getLinkLocation().y < BORDER_THICKNESS || y - links[i].getLinkLocation().y >= links[i].getLinkLocation().height -  BORDER_THICKNESS) {
+                                r = (byte) BORDER_COLOR.getRed();
+                                g = (byte) BORDER_COLOR.getGreen();
+                                b = (byte) BORDER_COLOR.getBlue();
+                            }
+                        }
+                    }
                 }
-                
                 int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
                 img.setRGB(x,y,pix);
                 ind++;
