@@ -32,7 +32,6 @@ public class HyperMediaTool extends JFrame{
     private int curSourceFrameEndNum;
     private Rectangle currSourceRectStart;
     private Rectangle currSourceRectEnd;
-    private String targetVideoPath;
     private JComboBox<String> selectHyperLink;
     private static String sourceVideoFolder;
   
@@ -63,7 +62,6 @@ public class HyperMediaTool extends JFrame{
 	    curSourceFrameEndNum = 0;
 	    currSourceRectStart = new Rectangle(0, 0, 0, 0);
 	    currSourceRectEnd = new Rectangle(0, 0, 0, 0);
-	    targetVideoPath = null;
 	}
 
 	/**
@@ -73,6 +71,14 @@ public class HyperMediaTool extends JFrame{
 		
 		try {
 			sourceVideo = new Video(sourceVideoFolder);
+			if (sourceVideo.isHyper()) {
+			    for (int i = 0; i < sourceVideo.hypVals.length; i++) {
+			        Rectangle startRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][2]), Integer.parseInt(sourceVideo.hypVals[i][3]), Integer.parseInt(sourceVideo.hypVals[i][4]), Integer.parseInt(sourceVideo.hypVals[i][5]));
+	                Rectangle endRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][6]), Integer.parseInt(sourceVideo.hypVals[i][7]), Integer.parseInt(sourceVideo.hypVals[i][8]), Integer.parseInt(sourceVideo.hypVals[i][9]));
+                    Hyperlink newLink = new Hyperlink(sourceVideo.hypVals[i][12], Integer.parseInt(sourceVideo.hypVals[i][0]), Integer.parseInt(sourceVideo.hypVals[i][1]), startRect, endRect, sourceVideo.hypVals[i][10], Integer.parseInt(sourceVideo.hypVals[i][11]));
+                    links.add(newLink);
+			    }
+			}
 		}catch(Exception e) {}
 		
 		
@@ -296,6 +302,9 @@ public class HyperMediaTool extends JFrame{
 		
 		selectHyperLink = new JComboBox<String>();
 		selectHyperLink.addItem("Select a Link");
+		for (int i = 0; i < links.size(); i++) {
+		    selectHyperLink.addItem(links.get(i).getName());
+		}
 		selectHyperLink.setBounds(756, 89, 176, 27);
 		frame.getContentPane().add(selectHyperLink);
 		selectHyperLink.addItemListener(new ItemListener() {

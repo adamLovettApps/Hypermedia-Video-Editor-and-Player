@@ -25,6 +25,8 @@ public class Video {
     public static final int LEADING_FRAME_BUFFER = 10;
     public static final int TRAILING_FRAME_BUFFER = 10;
     public static final int LINK_MAX = 50;
+    public static final int HYP_MAX = 200;
+    public static final int HYP_FIELDS = 13;
     private int currentFrame;
     private File[] rgbFiles;
     private Frame[] frameArray;
@@ -33,6 +35,7 @@ public class Video {
     private FileInputStream audioStream;
     private Clip clip;
     private String folderPath;
+    public String[][] hypVals;
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
@@ -55,12 +58,16 @@ public class Video {
         else {
             isHyper = true;
             linkArray = new VideoLink[rgbFiles.length][LINK_MAX];
+            hypVals = new String[HYP_MAX][HYP_FIELDS];
             FileInputStream fstream = new FileInputStream(hypFiles[0]);
             BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
             String line;
+            int counter = 0;
             while ((line = br.readLine()) != null) {
                 //System.out.println (line);
                 String[] vals = line.split(" ");
+                hypVals[counter] = vals;
+                counter++;
                 Rectangle startRect = new Rectangle(Integer.parseInt(vals[2]), Integer.parseInt(vals[3]), Integer.parseInt(vals[4]), Integer.parseInt(vals[5]));
                 Rectangle endRect = new Rectangle(Integer.parseInt(vals[6]), Integer.parseInt(vals[7]), Integer.parseInt(vals[8]), Integer.parseInt(vals[9]));
                 
