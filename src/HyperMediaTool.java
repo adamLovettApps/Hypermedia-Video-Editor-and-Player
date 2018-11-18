@@ -250,7 +250,10 @@ public class HyperMediaTool extends JFrame{
 							currentHyperlink.setEndFrame(sourceVideo.getDuration());
 							currentHyperlink.setEndRect(sourceVideoFrame.getCurrentRect());
 						}
-						//System.out.println("TEST");
+						sourceVideoFrame.setCurrentRectNull();
+						sourceImg = sourceVideo.getCurrentFrame().getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+						sourceVideoFrame.repaint();
 					}
 				}
 			}

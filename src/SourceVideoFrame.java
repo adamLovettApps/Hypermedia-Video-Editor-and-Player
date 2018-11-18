@@ -67,7 +67,7 @@ public class SourceVideoFrame extends JLabel {
        }   
        if(currentRect != null) {
     	   g.setColor(rectColor);
-    	   g.drawRect((int)currentRect.getX(), (int)currentRect.getY(), (int)currentRect.getWidth(), (int)currentRect.getHeight());
+    	  // g.drawRect((int)currentRect.getX(), (int)currentRect.getY(), (int)currentRect.getWidth(), (int)currentRect.getHeight());
        }
        
    }
@@ -89,7 +89,7 @@ public class SourceVideoFrame extends JLabel {
     
     public void setCurrentRectColor() {
     	rectColor = Color.red;
-    	paintComponent(this.getGraphics());
+    	//paintComponent(this.getGraphics());
     }
     
     private class DrawRectangle extends MouseAdapter {
