@@ -36,6 +36,7 @@ public class Video {
     private Clip clip;
     private String folderPath;
     public String[][] hypVals;
+    private Frame currentFrameTool;
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
@@ -114,6 +115,15 @@ public class Video {
     
     public Frame getCurrentFrame() {
         return frameArray[currentFrame];
+    }
+    
+    public Frame getCurrentFrameTool(int frameNum) {
+    	this.currentFrame = frameNum;
+    	currentFrameTool = null;
+    	try {
+    		currentFrameTool = new Frame(rgbFiles[frameNum]);
+    	}catch(Exception e) {}
+        return currentFrameTool;
     }
     
     public void setCurrentFrame(int index) throws IOException {
