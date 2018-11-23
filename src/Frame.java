@@ -22,8 +22,8 @@ public class Frame {
     public static final int BLUE = 2;
     public static final int WIDTH = 352;
     public static final int HEIGHT = 288;
-    public static final float BRIGHTNESS_FACTOR = 1f;
-    public static final float BRIGHTNESS_FACTOR2 = 0.6f;
+    public static final float BRIGHTNESS_FACTOR = 0.25f;
+    //public static final float BRIGHTNESS_FACTOR2 = 0.6f;
     private static Rectangle currentRect;
     
     private byte[] data;
@@ -124,6 +124,18 @@ public class Frame {
                                 r = (byte) BORDER_COLOR.getRed();
                                 g = (byte) BORDER_COLOR.getGreen();
                                 b = (byte) BORDER_COLOR.getBlue();
+                            }
+                            else {
+                                float[] hsbvals = { 0, 0, 0 };
+                                Color.RGBtoHSB(ByteToInt(r), ByteToInt(g), ByteToInt(b), hsbvals );
+                                float newBrightness = BRIGHTNESS_FACTOR + hsbvals[2];
+                                if (newBrightness > 1.0f) {
+                                    newBrightness = 1.0f;
+                                }
+                                Color c = new Color( Color.HSBtoRGB( hsbvals[0], hsbvals[1], newBrightness));
+                                r = (byte) c.getRed();
+                                g = (byte) c.getGreen();
+                                b = (byte) c.getBlue();
                             }
                         }
                     }
