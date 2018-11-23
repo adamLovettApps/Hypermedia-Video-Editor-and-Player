@@ -32,6 +32,10 @@ public class Hyperlink {
         return this.name;
     }
     
+    public String getVideoPath() {
+    	return this.videoPath;
+    }
+    
     public int getStartFrame() {
         return this.startFrame;
     }
@@ -47,7 +51,11 @@ public class Hyperlink {
     public Rectangle getEndRect() {
         return this.endRect;
     }
-      
+    
+    public int getTargetFrame() {
+    	return this.targetFrame;
+    }
+    
     public void setStartFrame(int frameNumber) {
     	this.startFrame = frameNumber;
     }

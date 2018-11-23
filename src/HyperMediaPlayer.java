@@ -139,7 +139,9 @@ public class HyperMediaPlayer {
 						    	frameCounter = links[i].getFrameStart();		
 						    	videoStack.getFirst().getClip().setMicrosecondPosition((long)Math.floor((double)videoStack.getFirst().getClip().getMicrosecondLength()
 						    			*(double)videoStack.getFirst().getCurrentFrameNum()/(double)videoStack.getFirst().getDuration()));
-						    	
+						    	try {
+						    		Thread.sleep(500);
+						    	}catch(Exception ex) {}
 						    	videoStack.getFirst().getClip().start();
 						    	videoTimer.start();
 						    	//System.out.println(videoStack.size());
