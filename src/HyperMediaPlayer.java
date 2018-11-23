@@ -82,7 +82,8 @@ public class HyperMediaPlayer {
 		    			videoFrame.repaint();  
 		    			
 		    			try {
-		    				videoStack.getFirst().setCurrentFrame(frameCounter);
+		    				videoStack.getFirst().setCurrentFrame(Math.floor(videoStack.getFirst().getClip().getMicrosecondPosition()
+				    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration()));
 		    			}catch(Exception ex) {}
 		    			frameCounter++;
 		    		}
