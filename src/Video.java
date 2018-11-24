@@ -23,7 +23,7 @@ import javax.sound.sampled.AudioSystem;
 
 public class Video {
     public static final int LEADING_FRAME_BUFFER = 10;
-    public static final int TRAILING_FRAME_BUFFER = 10;
+    public static final int TRAILING_FRAME_BUFFER = 5;
     public static final int LINK_MAX = 50;
     public static final int HYP_MAX = 200;
     public static final int HYP_FIELDS = 13;

@@ -27,8 +27,11 @@ public class HyperMediaPlayer {
 	private JLabel videoFrame;
 	private static int frameCounter = 0;
 	private static int timerDelay = 0;
-	private Deque<Video> videoStack = new ArrayDeque<Video>();
+	private Deque<VideoClipPair> videoClipStack = new ArrayDeque<VideoClipPair>();
 	private VideoLink[][] linkArray;
+	private Video currentVideo;
+	private JButton pauseButton;
+	private JButton playButton;
 	
 	public static void main(String[] args) {
 		String videoFolder = args[0];
@@ -52,9 +55,11 @@ public class HyperMediaPlayer {
 	}
 
 	public void initialize(String videoFolder) {
+		
 		try {			
-			videoStack.push(new Video(videoFolder));
+			currentVideo = new Video(videoFolder);
 		}catch(Exception e) {}
+		
 				
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.DARK_GRAY);
@@ -67,43 +72,61 @@ public class HyperMediaPlayer {
 		
 		ActionListener videoListener = new ActionListener(){
 		    public void actionPerformed(ActionEvent e){		    	
-		    	if (videoStack.getFirst().getCurrentFrameNum() < videoStack.getFirst().getDuration()) {
-		    		if ((videoStack.getFirst().getCurrentFrameNum() <= Math.floor(videoStack.getFirst().getClip().getMicrosecondPosition()
-		    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration())))) {
+		    	if (currentVideo.getCurrentFrameNum() < currentVideo.getDuration()) {
+		    		if ((currentVideo.getCurrentFrameNum() <= Math.floor(currentVideo.getClip().getMicrosecondPosition()
+		    				/((double)currentVideo.getClip().getMicrosecondLength()/(double)currentVideo.getDuration())))) {
 		    			//System.out.println(avStack.getFirst().getClip().getMicrosecondPosition());
 		    			//System.out.println(frameCounter);
-		    			if (videoStack.getFirst().isHyper()) {
-		    				img = videoStack.getFirst().getCurrentFrame().getFrameBytes(videoStack.getFirst().getCurrentVideoLinks());
+		    			if (currentVideo.isHyper()) {
+		    				img = currentVideo.getCurrentFrame().getFrameBytes(currentVideo.getCurrentVideoLinks());
 		    			}
 		    			else {
-		    				img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+		    				img = currentVideo.getCurrentFrame().getFrameBytes();
 		    			}
 		    			videoFrame.setIcon(new ImageIcon(img));		    	
 		    			videoFrame.repaint();  
 		    			
 		    			try {
-		    				videoStack.getFirst().setCurrentFrame((int)Math.floor(videoStack.getFirst().getClip().getMicrosecondPosition()
-				    				/((double)videoStack.getFirst().getClip().getMicrosecondLength()/(double)videoStack.getFirst().getDuration())));
+		    				/*currentVideo.setCurrentFrame((int)Math.floor(currentVideo.getClip().getMicrosecondPosition()
+				    				/((double)currentVideo.getClip().getMicrosecondLength()/(double)currentVideo.getDuration())));*/
+		    				if((currentVideo.getCurrentFrameNum() <= Math.floor(currentVideo.getClip().getMicrosecondPosition()
+				    				/((double)currentVideo.getClip().getMicrosecondLength()/(double)currentVideo.getDuration())) + 1)) {
+		    					currentVideo.setCurrentFrame((int)Math.floor(currentVideo.getClip().getMicrosecondPosition()
+					    				/((double)currentVideo.getClip().getMicrosecondLength()/(double)currentVideo.getDuration())));
+		    				}	
+		    				else {
+		    					currentVideo.setCurrentFrame(frameCounter);
+		    				}
 		    			}catch(Exception ex) {}
 		    			frameCounter++;
 		    		}
 		    	}
 		    	else {
-		    		if (videoStack.size() > 1) {
-		    			videoStack.pop();
-		    			frameCounter = videoStack.getFirst().getCurrentFrameNum();
-		    			videoStack.getFirst().getClip().start();
+		    		if (videoClipStack.size() >= 1) {		    			
+		    			try {
+		    				currentVideo = null;
+		    				System.gc();
+		                	System.runFinalization();
+		    				currentVideo = new Video(videoClipStack.getFirst().getVideoName());
+		    				//System.out.println(currentVideo.getPath());
+		    				currentVideo.getClip().setMicrosecondPosition(videoClipStack.getFirst().getClipPosition());
+		    				currentVideo.setCurrentFrame((int)Math.round(currentVideo.getClip().getMicrosecondPosition()
+				    				/((double)currentVideo.getClip().getMicrosecondLength()/(double)currentVideo.getDuration())));
+		    			}catch(Exception ex) {}
+		    			frameCounter = currentVideo.getCurrentFrameNum();
+		    			currentVideo.getClip().start();
+		    			videoClipStack.pop();
 		    		}
 		    		else {
-		    			videoStack.getFirst().getClip().stop();
-		    			videoStack.getFirst().getClip().setMicrosecondPosition(0);
+		    			currentVideo.getClip().stop();
+		    			frameCounter = 0;
+		    			currentVideo.getClip().setMicrosecondPosition(0);
 						try {
-							videoStack.getFirst().setCurrentFrame(0);
+							currentVideo.setCurrentFrame(0);
 						}catch(Exception excep) {}
-						img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+						img = currentVideo.getCurrentFrame().getFrameBytes();
 		  				videoFrame.setIcon(new ImageIcon(img));
 						videoFrame.repaint();
-						frameCounter = 0;
 		    		}
 		    	}
 		    }	    	
@@ -118,9 +141,9 @@ public class HyperMediaPlayer {
 				int x=e.getX();
 			    int y=e.getY();
 			    
-			    if (videoStack.getFirst().isHyper()) {
+			    if (currentVideo.isHyper()) {
 			    	
-			    	VideoLink[] links = videoStack.getFirst().getCurrentVideoLinks();
+			    	VideoLink[] links = currentVideo.getCurrentVideoLinks();
 			    	
 			    	for (int i = 0; i <links.length ; i++) {
 			    		if (links[i] == null) {
@@ -128,23 +151,25 @@ public class HyperMediaPlayer {
 			    		}
 			    		else {
 			    			if (links[i].getLinkLocation().contains(x,y)) {
-			    				videoStack.getFirst().getClip().stop();
+			    				currentVideo.getClip().stop();
 						    	videoTimer.stop();
-						    	try {		
-						    		//videoStack.push(links[i].getVideo());
-						    		videoStack.push(new Video(links[i].getPath()));
-						    		videoStack.getFirst().setCurrentFrame(links[i].getFrameStart());
+						    	videoClipStack.push(new VideoClipPair(currentVideo.getPath(), (int)currentVideo.getClip().getMicrosecondPosition()));
+						    	try {
+						    		currentVideo = null;
+						    		System.gc();
+				                	System.runFinalization();
+						    		currentVideo = new Video(links[i].getPath());
+						    		//videoClipStack.push(new Video(links[i].getPath()));
+						    		currentVideo.setCurrentFrame(links[i].getFrameStart());
+						    		//videoStack.getFirst().setCurrentFrame(links[i].getFrameStart());
 						    	}catch(Exception ex) {}
 						    	
 						    	frameCounter = links[i].getFrameStart();		
-						    	videoStack.getFirst().getClip().setMicrosecondPosition((long)Math.floor((double)videoStack.getFirst().getClip().getMicrosecondLength()
-						    			*(double)videoStack.getFirst().getCurrentFrameNum()/(double)videoStack.getFirst().getDuration()));
-						    	try {
-						    		Thread.sleep(500);
-						    	}catch(Exception ex) {}
-						    	videoStack.getFirst().getClip().start();
+						    	currentVideo.getClip().setMicrosecondPosition((long)Math.floor((double)currentVideo.getClip().getMicrosecondLength()
+						    			*(double)currentVideo.getCurrentFrameNum()/(double)currentVideo.getDuration()));					    
+						    	currentVideo.getClip().start();
 						    	videoTimer.start();
-						    	//System.out.println(videoStack.size());
+						    	
 			    			}			    						    			
 			    		}
 			    	}
@@ -156,22 +181,36 @@ public class HyperMediaPlayer {
 		videoFrame.setBounds(20, 20, 352, 288);
 		frame.getContentPane().add(videoFrame);
 		
-		JButton playButton = new JButton("Play");
+		playButton = new JButton("Play");
 		playButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				videoStack.getFirst().getClip().start();
+				currentVideo.getClip().start();
+				videoTimer.start();
+			}
+		});
+		playButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				currentVideo.getClip().start();
 				videoTimer.start();
 			}
 		});
 		playButton.setBounds(423, 57, 117, 29);
 		frame.getContentPane().add(playButton);
 		
-		JButton pauseButton = new JButton("Pause");
+		pauseButton = new JButton("Pause");
 		pauseButton.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				videoStack.getFirst().getClip().stop();
+			public void mousePressed(MouseEvent e) {
+				currentVideo.getClip().stop();
+				videoTimer.stop();
+			}
+		});
+		pauseButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				currentVideo.getClip().stop();
 				videoTimer.stop();
 			}
 		});
@@ -183,11 +222,11 @@ public class HyperMediaPlayer {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					videoStack.getFirst().getClip().stop();
+					currentVideo.getClip().stop();
 					videoTimer.stop();
-					videoStack.getFirst().getClip().setMicrosecondPosition(0);
-					videoStack.getFirst().setCurrentFrame(0);
-					img = videoStack.getFirst().getCurrentFrame().getFrameBytes();
+					currentVideo.getClip().setMicrosecondPosition(0);
+					currentVideo.setCurrentFrame(0);
+					img = currentVideo.getCurrentFrame().getFrameBytes();
 	  				videoFrame.setIcon(new ImageIcon(img));
 					videoFrame.repaint();
 					frameCounter = 0;
@@ -196,5 +235,23 @@ public class HyperMediaPlayer {
 		});
 		stopButton.setBounds(423, 217, 117, 29);
 		frame.getContentPane().add(stopButton);
+	}
+	
+	private class VideoClipPair{
+		private String videoName;
+		private int clipPosition;
+		
+		public VideoClipPair(String videoNameIn, int clipPositionIn) {
+			this.videoName = videoNameIn;
+			this.clipPosition = clipPositionIn;
+		}
+		
+		public String getVideoName(){
+			return this.videoName;
+		}
+		
+		public int getClipPosition(){
+			return this.clipPosition;
+		}
 	}
 }
