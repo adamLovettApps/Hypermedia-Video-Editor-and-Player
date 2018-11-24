@@ -27,26 +27,29 @@ public class HyperMediaTool extends JFrame{
 	private Video sourceVideo;
 	private Video targetVideo;
 	private File[] directories;
-	private ArrayList<String> inputFolders = new ArrayList<String>();
+	private ArrayList<String> sourceInputFolders = new ArrayList<String>();
+	private ArrayList<String> targetInputFolders = new ArrayList<String>();
 	private ArrayList<Hyperlink> links;
 	private Hyperlink currentHyperlink;
     private int currSourceFrameStartNum;
     private int curSourceFrameEndNum;
     private Rectangle currSourceRectStart;
     private Rectangle currSourceRectEnd;
-    private JComboBox<String> selectHyperLink;
+    private Rectangle startRect;
+    private Rectangle endRect;
+    private Hyperlink newLink;
+    private JComboBox<String> selectHyperLink = new JComboBox<String>();
     private static String sourceVideoFolder;
   
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		sourceVideoFolder = args[0];
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					HyperMediaTool window = new HyperMediaTool();
-					window.initialize(sourceVideoFolder);
+					window.initialize();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -69,44 +72,25 @@ public class HyperMediaTool extends JFrame{
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize(String sourceVideoFolder) {
-		
-		try {
-			sourceVideo = new Video(sourceVideoFolder);
-			if (sourceVideo.isHyper()) {
-			    for (int i = 0; i < sourceVideo.hypVals.length; i++) {
-			        Rectangle startRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][2]), Integer.parseInt(sourceVideo.hypVals[i][3]), Integer.parseInt(sourceVideo.hypVals[i][4]), Integer.parseInt(sourceVideo.hypVals[i][5]));
-	                Rectangle endRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][6]), Integer.parseInt(sourceVideo.hypVals[i][7]), Integer.parseInt(sourceVideo.hypVals[i][8]), Integer.parseInt(sourceVideo.hypVals[i][9]));
-                    Hyperlink newLink = new Hyperlink(sourceVideo.hypVals[i][12], Integer.parseInt(sourceVideo.hypVals[i][0]), Integer.parseInt(sourceVideo.hypVals[i][1]), startRect, endRect, sourceVideo.hypVals[i][10], Integer.parseInt(sourceVideo.hypVals[i][11]));
-                    links.add(newLink);
-			    }
-			}
-		}catch(Exception e) {}
-		
+	private void initialize() {		
 		
 		directories = new File(System.getProperty("user.dir")).listFiles(File::isDirectory);
 		
-		inputFolders.add("Select a Target Video");
+		targetInputFolders.add("Select a Target Video");
 		for (int i = 0; i < directories.length; i++) {
-			inputFolders.add(directories[i].toString().substring(directories[i].toString().lastIndexOf("/") + 1));
+			targetInputFolders.add(directories[i].toString().substring(directories[i].toString().lastIndexOf("/") + 1));
+		}
+		
+		sourceInputFolders.add("Select a Source Video");
+		for (int i = 0; i < directories.length; i++) {
+			sourceInputFolders.add(directories[i].toString().substring(directories[i].toString().lastIndexOf("/") + 1));
 		}
 		
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.DARK_GRAY);
-		frame.setBounds(200, 100, 950, 470);
+		frame.setBounds(200, 100, 1156, 465);
 		frame.setResizable(false);
-		frame.getContentPane().setLayout(null);
-		frame.addWindowListener(new WindowAdapter()
-		{
-		    public void windowClosing(WindowEvent e){
-		    	try {
-		    		saveHyp();
-		    	}catch(Exception ex){}
-		    }
-		});
-		
-
-		sourceImg = sourceVideo.getCurrentFrameTool(0).getFrameBytes(links, sourceVideo.getCurrentFrameNum(), "");		
+		frame.getContentPane().setLayout(null);	
 		
 		SourceVideoFrame sourceVideoFrame = new SourceVideoFrame(new ImageIcon(sourceImg));
 		sourceVideoFrame.setBackground(Color.BLACK);
@@ -134,7 +118,7 @@ public class HyperMediaTool extends JFrame{
 		
 		final JSlider sourceSlider = new JSlider();
 		sourceSlider.setMinimum(1);
-		sourceSlider.setMaximum(9000);
+		sourceSlider.setMaximum(1);
 		sourceSlider.setValue(1);
 		sourceSlider.setPaintTicks(true);
 		sourceSlider.setPaintLabels(true);
@@ -171,7 +155,7 @@ public class HyperMediaTool extends JFrame{
 		else {
 			targetSlider.setMaximum(1);
 		}
-		//targetSlider.setValue(1);
+		targetSlider.setValue(1);
 		targetSlider.setPaintTicks(true);
 		targetSlider.setPaintLabels(true);
 		targetSlider.addChangeListener(new ChangeListener() {
@@ -190,11 +174,60 @@ public class HyperMediaTool extends JFrame{
 		targetSlider.setBounds(392, 328, 352, 40);
 		frame.getContentPane().add(targetSlider);
 		
+		
+		
+		JComboBox<String> selectSourceVideo = new JComboBox<String>();
+		selectSourceVideo.setBounds(962, 20, 186, 29);
+		frame.getContentPane().add(selectSourceVideo);
+		for (int i =0; i < targetInputFolders.size(); i++) {
+			selectSourceVideo.addItem((String)sourceInputFolders.get(i));
+		}	
+		selectSourceVideo.addItemListener(new ItemListener() {
+	        @Override
+	        public void itemStateChanged(ItemEvent e) {
+	            if(e.getStateChange() == ItemEvent.SELECTED) {
+	                String sourceFolder = selectSourceVideo.getSelectedItem().toString();
+	                try {
+	                	if (!sourceFolder.equals("Select a Source Video")){
+	                	System.gc();
+	                	System.runFinalization(); 
+	                	sourceVideo = null;
+	                	sourceVideo = new Video(sourceFolder);
+	                	for (int i = links.size() - 1; i >= 0 ; i--) {
+	                		links.remove(i);
+	                	}
+	                	selectHyperLink.removeAllItems();
+	                	selectHyperLink.addItem("Select a Link");
+	                	if (sourceVideo.isHyper()) {
+	        			    for (int i = 0; i < sourceVideo.getNumLinks(); i++) {
+	        			        startRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][2]), Integer.parseInt(sourceVideo.hypVals[i][3]), Integer.parseInt(sourceVideo.hypVals[i][4]), Integer.parseInt(sourceVideo.hypVals[i][5]));
+	        	                endRect = new Rectangle(Integer.parseInt(sourceVideo.hypVals[i][6]), Integer.parseInt(sourceVideo.hypVals[i][7]), Integer.parseInt(sourceVideo.hypVals[i][8]), Integer.parseInt(sourceVideo.hypVals[i][9]));
+	                            newLink = new Hyperlink(sourceVideo.hypVals[i][12], Integer.parseInt(sourceVideo.hypVals[i][0]), Integer.parseInt(sourceVideo.hypVals[i][1]), startRect, endRect, sourceVideo.hypVals[i][10], Integer.parseInt(sourceVideo.hypVals[i][11]));
+	                            links.add(newLink);
+	        			    }
+	        			}
+	            		for (int i = 0; i < links.size(); i++) {
+	            		    selectHyperLink.addItem(links.get(i).getName());
+	            		}
+	                	//targetVideo.setCurrentFrame(0);
+	                	sourceSlider.setValue(1);
+	                	sourceSlider.setMaximum(sourceVideo.getDuration());
+						sourceImg = sourceVideo.getCurrentFrameTool(0).getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+						sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+	                	}
+	                }catch(Exception ex){}
+	                sourceVideoFrame.repaint();
+	            }
+	        }
+	    });
+		
+		
+		
 		JComboBox<String> selectTargetVideo = new JComboBox<String>();
-		selectTargetVideo.setBounds(756, 20, 176, 29);
+		selectTargetVideo.setBounds(962, 89, 186, 29);
 		frame.getContentPane().add(selectTargetVideo);
-		for (int i =0; i < inputFolders.size(); i++) {
-			selectTargetVideo.addItem((String)inputFolders.get(i));
+		for (int i =0; i < targetInputFolders.size(); i++) {
+			selectTargetVideo.addItem((String)targetInputFolders.get(i));
 		}	
 		selectTargetVideo.addItemListener(new ItemListener() {
 	        @Override
@@ -209,7 +242,7 @@ public class HyperMediaTool extends JFrame{
 	                	targetVideo = new Video(targetFolder);
 	                	//targetVideo.setCurrentFrame(0);
 	                	targetSlider.setValue(1);
-	                	targetSlider.setMaximum(targetVideo.getDuration() + 1);
+	                	targetSlider.setMaximum(targetVideo.getDuration());
 						targetImg = targetVideo.getCurrentFrameTool(0).getFrameBytes();
 						targetVideoFrame.setIcon(new ImageIcon(targetImg));
 	                	}
@@ -249,7 +282,7 @@ public class HyperMediaTool extends JFrame{
                 }catch(Exception ex) {}
 			}
 		});
-		addLink.setBounds(756, 158, 176, 29);
+		addLink.setBounds(962, 227, 186, 29);
 		frame.getContentPane().add(addLink);
 		
 		JButton setStartBounds = new JButton("Set Start Bounds");
@@ -275,7 +308,7 @@ public class HyperMediaTool extends JFrame{
 				}
 			}
 		});
-		setStartBounds.setBounds(756, 296, 176, 29);
+		setStartBounds.setBounds(756, 20, 186, 29);
 		frame.getContentPane().add(setStartBounds);
 		
 		JButton setEndBounds = new JButton("Set End Bounds");
@@ -300,15 +333,83 @@ public class HyperMediaTool extends JFrame{
 				}
 			}
 		});
-		setEndBounds.setBounds(756, 365, 176, 29);
+		setEndBounds.setBounds(756, 89, 186, 29);
 		frame.getContentPane().add(setEndBounds);
 		
-		selectHyperLink = new JComboBox<String>();
+		JButton setTargetFrame = new JButton("Set Target Frame");
+		setTargetFrame.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(currentHyperlink != null) {
+					currentHyperlink.setTargetFrame(targetVideo.getCurrentFrameNum());
+					currentHyperlink.setVideoPath(targetVideo.getPath());
+				}
+				
+			}
+		});
+		setTargetFrame.setBounds(756, 158, 186, 29);
+		frame.getContentPane().add(setTargetFrame);
+		
+		JButton deleteCurrentLink = new JButton("Delete Current Link");
+		deleteCurrentLink.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				for (int i=0; i < links.size(); i++) {
+	            	   if (links.get(i).getName().equals(selectHyperLink.getSelectedItem().toString())) {
+	            		   links.remove(i);
+	            	   }
+				}
+				selectHyperLink.removeAllItems();
+            	selectHyperLink.addItem("Select a Link");	
+            	for (int i = 0; i < links.size(); i++) {
+        		    selectHyperLink.addItem(links.get(i).getName());
+        		}
+            	sourceImg = sourceVideo.getCurrentFrameTool(sourceVideo.getCurrentFrameNum()).getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+				sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+				sourceVideoFrame.repaint();
+			}
+		});
+		deleteCurrentLink.setBounds(756, 227, 186, 29);
+		frame.getContentPane().add(deleteCurrentLink);
+		
+		JButton deleteAllLinks = new JButton("Delete All Links");
+		deleteAllLinks.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				//System.out.println(links.size());
+				for (int i = links.size() -1 ; i >= 0 ; i--) {
+            		links.remove(i);
+            	}
+            	selectHyperLink.removeAllItems();
+            	selectHyperLink.addItem("Select a Link");	
+            	sourceImg = sourceVideo.getCurrentFrameTool(sourceVideo.getCurrentFrameNum()).getFrameBytes(links, sourceVideo.getCurrentFrameNum(), selectHyperLink.getSelectedItem().toString());
+				sourceVideoFrame.setIcon(new ImageIcon(sourceImg));
+				sourceVideoFrame.repaint();
+			}
+		});
+		deleteAllLinks.setBounds(756, 296, 186, 29);
+		frame.getContentPane().add(deleteAllLinks);
+		
+		JButton saveCurrentVideo = new JButton("Save Source Video Links");
+		saveCurrentVideo.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (sourceVideo != null) {
+					try {
+						saveHyp();
+					}catch(Exception ex) {}
+				}
+			}
+		});
+		saveCurrentVideo.setBounds(855, 365, 186, 29);
+		frame.getContentPane().add(saveCurrentVideo);
+		
+		
 		selectHyperLink.addItem("Select a Link");
 		for (int i = 0; i < links.size(); i++) {
 		    selectHyperLink.addItem(links.get(i).getName());
 		}
-		selectHyperLink.setBounds(756, 89, 176, 27);
+		selectHyperLink.setBounds(962, 158, 186, 27);
 		frame.getContentPane().add(selectHyperLink);
 		selectHyperLink.addItemListener(new ItemListener() {
 	        @Override
@@ -335,7 +436,7 @@ public class HyperMediaTool extends JFrame{
 	    });
 		
 		linkName = new JTextField();
-		linkName.setBounds(760, 227, 168, 26);
+		linkName.setBounds(965, 296, 178, 26);
 		frame.getContentPane().add(linkName);
 		linkName.setColumns(10);
 		
@@ -362,7 +463,7 @@ public class HyperMediaTool extends JFrame{
 		frame.getContentPane().add(jumpSourceButton);
 		
 		jumpTargetText = new JTextField();
-		jumpTargetText.setBounds(582, 402, 45, 26);
+		jumpTargetText.setBounds(580, 402, 45, 26);
 		frame.getContentPane().add(jumpTargetText);
 		jumpTargetText.setColumns(10);
 		
@@ -380,14 +481,19 @@ public class HyperMediaTool extends JFrame{
 				jumpTargetText.setText("");
 			}
 		});
-		jumpTargetButton.setBounds(469, 402, 117, 29);
+		jumpTargetButton.setBounds(467, 402, 117, 29);
 		frame.getContentPane().add(jumpTargetButton);
+		
+		
+		
+		
+		
 	
 	}
 	
 	private void saveHyp() throws IOException {
 	    File dir = new File(sourceVideo.getPath());
-	    String name = sourceVideoFolder + ".hyp";
+	    String name = sourceVideo.getPath() + ".hyp";
 	    File fullPath = new File(dir, name);
 	    PrintWriter writer = new PrintWriter(fullPath, "UTF-8");
 	    for (int i = 0; i < this.links.size(); i++) {

@@ -37,6 +37,7 @@ public class Video {
     private String folderPath;
     public String[][] hypVals;
     private Frame currentFrameTool;
+    private int numLinks = 0;
     
     Video(String folderPath) throws IOException {
         this.currentFrame = 0;
@@ -65,6 +66,7 @@ public class Video {
             String line;
             int counter = 0;
             while ((line = br.readLine()) != null) {
+            	numLinks++;
                 //System.out.println (line);
                 String[] vals = line.split(" ");
                 hypVals[counter] = vals;
@@ -160,6 +162,10 @@ public class Video {
         return folderPath;
     }
     
+    public int getNumLinks() {
+    	return numLinks;
+    }
+    
     private void bufferFrames() throws IOException {
         for (int i = currentFrame; i < (currentFrame + LEADING_FRAME_BUFFER); i++) {
             if (frameArray[i] == null) {
@@ -172,4 +178,5 @@ public class Video {
         System.gc();
         System.runFinalization();
     }   
+    
 }

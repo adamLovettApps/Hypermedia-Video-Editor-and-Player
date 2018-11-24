@@ -72,6 +72,14 @@ public class Hyperlink {
     	this.endRect = rect;
     }
     
+    public void setTargetFrame(int frameNumber) {
+    	this.targetFrame = frameNumber;
+    }
+    
+    public void setVideoPath(String path) {
+    	this.videoPath = path;
+    }
+    
     public String getHypLine() {
         String [] fields = new String[13];
         fields[0] = Integer.toString(this.startFrame);
